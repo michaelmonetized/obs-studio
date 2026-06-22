@@ -11,6 +11,12 @@
 
 #include <qt-wrappers.hpp>
 
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QListWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+
 #include <QUuid>
 
 static const QUuid &CustomServerUUID()
@@ -90,6 +96,83 @@ void OBSBasicSettings::InitStreamPage()
 		&OBSBasicSettings::UpdateMultitrackVideo);
 	connect(ui->multitrackVideoConfigOverrideEnable, &QCheckBox::toggled, this,
 		&OBSBasicSettings::UpdateMultitrackVideo);
+
+	InitExtraDestinationsUI();
+}
+
+void OBSBasicSettings::InitExtraDestinationsUI()
+{
+	extraDestinationsGroup = new QGroupBox(QTStr("Basic.Settings.Stream.AdditionalDestinations"), ui->streamKeyPage);
+	auto *groupLayout = new QVBoxLayout(extraDestinationsGroup);
+
+	extraDestinationsList = new QListWidget(extraDestinationsGroup);
+	groupLayout->addWidget(extraDestinationsList);
+
+	auto *buttonsLayout = new QHBoxLayout();
+	addExtraDestinationButton = new QPushButton(extraDestinationsGroup);
+	addExtraDestinationButton->setProperty("class", "icon-plus");
+	addExtraDestinationButton->setToolTip(QTStr("Basic.Settings.Stream.AddDestination"));
+	addExtraDestinationButton->setAccessibleName(QTStr("Basic.Settings.Stream.AddDestination"));
+
+	removeExtraDestinationButton = new QPushButton(QTStr("Remove"), extraDestinationsGroup);
+	removeExtraDestinationButton->setEnabled(false);
+
+	buttonsLayout->addWidget(addExtraDestinationButton);
+	buttonsLayout->addWidget(removeExtraDestinationButton);
+	buttonsLayout->addStretch();
+	groupLayout->addLayout(buttonsLayout);
+
+	const int index = ui->streamkeyPageLayout->indexOf(ui->multitrackVideoGroupBox);
+	ui->streamkeyPageLayout->insertWidget(index, extraDestinationsGroup);
+
+	connect(addExtraDestinationButton, &QPushButton::clicked, this,
+		&OBSBasicSettings::on_addExtraDestination_clicked);
+	connect(removeExtraDestinationButton, &QPushButton::clicked, this,
+		&OBSBasicSettings::on_removeExtraDestination_clicked);
+	connect(extraDestinationsList, &QListWidget::itemSelectionChanged, this, [this]() {
+		removeExtraDestinationButton->setEnabled(extraDestinationsList->currentRow() >= 0);
+	});
+
+	RefreshExtraDestinationsList();
+}
+
+void OBSBasicSettings::RefreshExtraDestinationsList()
+{
+	if (!extraDestinationsList) {
+		return;
+	}
+
+	extraDestinationsList->clear();
+
+	const auto destinations = main->GetExtraStreamDestinations();
+	for (const auto &destination : destinations) {
+		extraDestinationsList->addItem(QString::fromStdString(destination.second));
+	}
+
+	if (removeExtraDestinationButton) {
+		removeExtraDestinationButton->setEnabled(false);
+	}
+}
+
+void OBSBasicSettings::on_addExtraDestination_clicked()
+{
+	main->ShowAddStreamDestinationDialog(this);
+	RefreshExtraDestinationsList();
+}
+
+void OBSBasicSettings::on_removeExtraDestination_clicked()
+{
+	const int row = extraDestinationsList ? extraDestinationsList->currentRow() : -1;
+	if (row < 0) {
+		return;
+	}
+
+	main->RemoveExtraStreamDestination(static_cast<size_t>(row));
+	if (main->outputHandler) {
+		main->outputHandler->extraStreamOutputs.Clear();
+	}
+	RefreshExtraDestinationsList();
+	main->UpdateStreamDestinationsStatus();
 }
 
 void OBSBasicSettings::LoadStream1Settings()

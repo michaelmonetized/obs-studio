@@ -98,7 +98,11 @@ bool OBSBasic::InitService()
 {
 	ProfileScope("OBSBasic::InitService");
 
+	extraStreamDestinations.clear();
+	extraStreamServices.clear();
+
 	if (LoadService()) {
+		LoadExtraStreamDestinations();
 		return true;
 	}
 
@@ -108,6 +112,7 @@ bool OBSBasic::InitService()
 	}
 	obs_service_release(service);
 
+	LoadExtraStreamDestinations();
 	return true;
 }
 
@@ -117,6 +122,11 @@ obs_service_t *OBSBasic::GetService()
 		service = obs_service_create("rtmp_common", NULL, NULL, nullptr);
 		obs_service_release(service);
 	}
+	return service;
+}
+
+obs_service_t *OBSBasic::GetService() const
+{
 	return service;
 }
 

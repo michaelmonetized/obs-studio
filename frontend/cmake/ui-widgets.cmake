@@ -36,6 +36,8 @@ target_sources(
     widgets/OBSBasic_Scenes.cpp
     widgets/OBSBasic_Screenshots.cpp
     widgets/OBSBasic_Service.cpp
+    widgets/OBSBasic_ExtraServices.cpp
+    widgets/OBSBasic_StreamingDestinations.cpp
     widgets/OBSBasic_StatusBar.cpp
     widgets/OBSBasic_Streaming.cpp
     widgets/OBSBasic_StudioMode.cpp

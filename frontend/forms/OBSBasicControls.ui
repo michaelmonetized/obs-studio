@@ -47,6 +47,31 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
+         <widget class="QPushButton" name="addStreamDestinationButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>28</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Basic.Settings.Stream.AddDestination</string>
+          </property>
+          <property name="accessibleName">
+           <string>Basic.Settings.Stream.AddDestination</string>
+          </property>
+          <property name="class" stdset="0">
+           <string>icon-plus</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="streamButton">
           <property name="enabled">
            <bool>true</bool>

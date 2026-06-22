@@ -22,7 +22,10 @@
 
 #include <utility/FFmpegShared.hpp>
 
+#include <QGroupBox>
+#include <QListWidget>
 #include <QPointer>
+#include <QPushButton>
 
 #define VOLUME_METER_DECAY_FAST 23.53
 #define VOLUME_METER_DECAY_MEDIUM 11.76
@@ -93,6 +96,11 @@ private:
 
 	QPointer<QLabel> advOutRecWarning;
 	QPointer<QLabel> simpleOutRecWarning;
+
+	QPointer<QGroupBox> extraDestinationsGroup;
+	QPointer<QListWidget> extraDestinationsList;
+	QPointer<QPushButton> addExtraDestinationButton;
+	QPointer<QPushButton> removeExtraDestinationButton;
 
 	QString curPreset;
 	QString curQSVPreset;
@@ -203,6 +211,8 @@ private:
 
 	/* stream */
 	void InitStreamPage();
+	void InitExtraDestinationsUI();
+	void RefreshExtraDestinationsList();
 	bool IsCustomService() const;
 	inline bool IsWHIP() const;
 	void LoadServices(bool showAll);
@@ -242,6 +252,8 @@ private slots:
 	void on_useStreamKey_clicked();
 	void on_useAuth_toggled();
 	void on_server_currentIndexChanged(int index);
+	void on_addExtraDestination_clicked();
+	void on_removeExtraDestination_clicked();
 
 	void on_hotkeyFilterReset_clicked();
 	void on_hotkeyFilterSearch_textChanged(const QString text);

@@ -54,6 +54,12 @@ void OBSBasic::StartStreaming()
 		return;
 	}
 
+	QString encoderError;
+	if (!ValidateStreamDestinationEncoders(encoderError)) {
+		OBSMessageBox::warning(this, QTStr("Output.StartStreamFailed"), encoderError);
+		return;
+	}
+
 	if (auth && auth->broadcastFlow()) {
 		if (!broadcastActive && !broadcastReady) {
 			QMessageBox no_broadcast(this);
@@ -244,6 +250,7 @@ void OBSBasic::StreamingStart()
 	emit StreamingStarted();
 	OBSOutputAutoRelease output = obs_frontend_get_streaming_output();
 	ui->statusbar->StreamStarted(output);
+	UpdateStreamDestinationsStatus();
 
 	if (sysTrayStream) {
 		sysTrayStream->setText(QTStr("Basic.Main.StopStreaming"));
@@ -346,6 +353,8 @@ void OBSBasic::StreamingStop(int code, QString last_error)
 	}
 
 	ui->statusbar->StreamStopped();
+
+	UpdateStreamDestinationsStatus();
 
 	emit StreamingStopped();
 
@@ -470,7 +479,7 @@ void OBSBasic::StreamActionTriggered()
 	}
 }
 
-bool OBSBasic::StreamingActive()
+bool OBSBasic::StreamingActive() const
 {
 	if (!outputHandler) {
 		return false;

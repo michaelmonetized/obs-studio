@@ -1,5 +1,6 @@
 #include <obs-module.h>
 #include <graphics/image-file.h>
+#include <util/task.h>
 #include <util/threading.h>
 #include <util/platform.h>
 #include <util/dstr.h>
@@ -28,6 +29,7 @@ struct image_source {
 	volatile bool texture_loaded;
 
 	gs_image_file4_t if4;
+	os_task_queue_t *decode_queue;
 };
 
 static time_t get_modified_timestamp(const char *filename)
@@ -85,14 +87,20 @@ static void image_source_unload(void *data)
 	obs_leave_graphics();
 }
 
+static void decode_image_file_task(void *data)
+{
+	image_source_preload_image(data);
+}
+
 static void image_source_load(struct image_source *context)
 {
+	if (context->decode_queue)
+		os_task_queue_wait(context->decode_queue);
+
 	image_source_unload(context);
 
-	if (context->file && *context->file) {
-		image_source_preload_image(context);
-		image_source_load_texture(context);
-	}
+	if (context->file && *context->file)
+		os_task_queue_queue_task(context->decode_queue, decode_image_file_task, context);
 }
 
 static void image_source_update(void *data, obs_data_t *settings)
@@ -169,6 +177,7 @@ static void *image_source_create(obs_data_t *settings, obs_source_t *source)
 {
 	struct image_source *context = bzalloc(sizeof(struct image_source));
 	context->source = source;
+	context->decode_queue = os_task_queue_create();
 
 	image_source_update(context, settings);
 	return context;
@@ -177,6 +186,12 @@ static void *image_source_create(obs_data_t *settings, obs_source_t *source)
 static void image_source_destroy(void *data)
 {
 	struct image_source *context = data;
+
+	if (context->decode_queue) {
+		os_task_queue_wait(context->decode_queue);
+		os_task_queue_destroy(context->decode_queue);
+		context->decode_queue = NULL;
+	}
 
 	image_source_unload(context);
 

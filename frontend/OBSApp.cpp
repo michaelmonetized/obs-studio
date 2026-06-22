@@ -22,6 +22,9 @@
 #include <plugin-manager/PluginManager.hpp>
 #include <utility/CrashHandler.hpp>
 #include <utility/OBSEventFilter.hpp>
+#ifdef __APPLE__
+#include <utility/platform.hpp>
+#endif
 #include <utility/OBSProxyStyle.hpp>
 #if defined(_WIN32) || defined(ENABLE_SPARKLE_UPDATER)
 #include <utility/models/branches.hpp>
@@ -116,6 +119,13 @@ UncleanLaunchAction handleUncleanShutdown(bool enableCrashUpload)
 		crashWarning.addButton(QTStr("CrashHandling.Buttons.LaunchNormal"), QMessageBox::RejectRole);
 
 	crashWarning.setDefaultButton(launchNormalButton);
+
+#ifdef __APPLE__
+	ActivateApplicationForDialog();
+#endif
+	crashWarning.setWindowFlag(Qt::WindowStaysOnTopHint, true);
+	crashWarning.activateWindow();
+	crashWarning.raise();
 
 	crashWarning.exec();
 

@@ -33,6 +33,7 @@
 #include <util/windows/win-version.h>
 #endif
 
+#include <QCoreApplication>
 #include <QFontDatabase>
 #include <QProcess>
 #include <QPushButton>
@@ -531,6 +532,13 @@ static int run_program(fstream &logFile, int argc, char *argv[])
 	 * and in the case of OBS it significantly slows down lists with many
 	 * elements (e.g. Hotkeys) and it is actually faster to disable it. */
 	qputenv("QT_NO_SUBTRACTOPAQUESIBLINGS", "1");
+
+#if defined(__APPLE__)
+	/* Work around libqcocoa use-after-free crashes on macOS 26+ (Tahoe). */
+	if (macOSVersionRequiresQtCocoaWorkarounds()) {
+		QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs);
+	}
+#endif
 
 	OBSApp program(argc, argv, profilerNameStore.get());
 	try {

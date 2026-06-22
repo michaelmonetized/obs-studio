@@ -60,4 +60,7 @@ struct SimpleOutput : BasicOutputHandler {
 	virtual bool StreamingActive() const override;
 	virtual bool RecordingActive() const override;
 	virtual bool ReplayBufferActive() const override;
+
+	obs_encoder_t *GetStreamVideoEncoder() const override { return videoStreaming; }
+	obs_encoder_t *GetStreamAudioEncoder() const override { return audioStreaming; }
 };

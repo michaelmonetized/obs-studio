@@ -6,6 +6,8 @@
 	<false/>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>UIDesignRequiresCompatibility</key>
+	<true/>
 	<key>LSAppNapIsDisabled</key>
 	<true/>
 	<key>SUFeedURL</key>

@@ -171,6 +171,21 @@ void EnableOSXDockIcon(bool enable)
         [NSApp setActivationPolicy:NSApplicationActivationPolicyProhibited];
 }
 
+bool macOSVersionRequiresQtCocoaWorkarounds()
+{
+    if (@available(macOS 26.0, *)) {
+        return true;
+    }
+
+    return false;
+}
+
+void ActivateApplicationForDialog()
+{
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+    [NSApp activateIgnoringOtherApps:YES];
+}
+
 @interface DockView : NSView {
       @private
     QIcon _icon;

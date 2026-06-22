@@ -2,6 +2,7 @@
 
 #include "ui_OBSBasicControls.h"
 
+#include <QLabel>
 #include <QFrame>
 #include <QPointer>
 #include <QScopedPointer>
@@ -18,6 +19,7 @@ class OBSBasicControls : public QFrame {
 	QScopedPointer<QMenu> streamButtonMenu;
 	QPointer<QAction> startStreamAction;
 	QPointer<QAction> stopStreamAction;
+	QPointer<QLabel> streamDestinationsStatus;
 
 private slots:
 	void StreamingPreparing();
@@ -49,12 +51,15 @@ private slots:
 	void EnableReplayBufferButtons(bool enabled);
 	void EnableVirtualCamButtons();
 
+	void UpdateStreamDestinationsStatus(const QString &summary);
+
 public:
 	OBSBasicControls(OBSBasic *main);
 	inline ~OBSBasicControls() {}
 
 signals:
 	void StreamButtonClicked();
+	void AddStreamDestinationButtonClicked();
 	void BroadcastButtonClicked();
 	void RecordButtonClicked();
 	void PauseRecordButtonClicked();

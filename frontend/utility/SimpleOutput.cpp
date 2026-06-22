@@ -744,6 +744,15 @@ bool SimpleOutput::StartStreaming(obs_service_t *service)
 	}
 
 	if (obs_output_start(streamOutput)) {
+		if (!StartExtraStreamOutputs(settings, useDelay ? delaySec : 0, preserveDelay, maxRetries,
+					     retryDelay)) {
+			obs_output_stop(streamOutput);
+			if (multitrackVideo && multitrackVideoActive) {
+				multitrackVideoActive = false;
+			}
+			return false;
+		}
+
 		if (multitrackVideo && multitrackVideoActive) {
 			multitrackVideo->StartedStreaming();
 		}
@@ -922,6 +931,8 @@ bool SimpleOutput::StartReplayBuffer()
 
 void SimpleOutput::StopStreaming(bool force)
 {
+	StopExtraStreamOutputs(force);
+
 	auto output = StreamingOutput();
 	if (force && output) {
 		obs_output_force_stop(output);
@@ -952,7 +963,7 @@ void SimpleOutput::StopReplayBuffer(bool force)
 
 bool SimpleOutput::StreamingActive() const
 {
-	return obs_output_active(StreamingOutput());
+	return obs_output_active(StreamingOutput()) || AnyExtraStreamActive();
 }
 
 bool SimpleOutput::RecordingActive() const

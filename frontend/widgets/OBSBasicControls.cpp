@@ -2,6 +2,8 @@
 #include "OBSBasic.hpp"
 #include "qt-wrappers.hpp"
 
+#include <QLabel>
+
 #include "moc_OBSBasicControls.cpp"
 
 OBSBasicControls::OBSBasicControls(OBSBasic *main) : QFrame(nullptr), ui(new Ui::OBSBasicControls)
@@ -18,6 +20,9 @@ OBSBasicControls::OBSBasicControls(OBSBasic *main) : QFrame(nullptr), ui(new Ui:
 	connect(
 		ui->streamButton, &QPushButton::clicked, this, [this]() { emit this->StreamButtonClicked(); },
 		Qt::DirectConnection);
+	connect(
+		ui->addStreamDestinationButton, &QPushButton::clicked, this,
+		[this]() { emit this->AddStreamDestinationButtonClicked(); }, Qt::DirectConnection);
 	connect(
 		ui->broadcastButton, &QPushButton::clicked, this, [this]() { emit this->BroadcastButtonClicked(); },
 		Qt::DirectConnection);
@@ -95,6 +100,16 @@ OBSBasicControls::OBSBasicControls(OBSBasic *main) : QFrame(nullptr), ui(new Ui:
 	connect(main, &OBSBasic::BroadcastFlowEnabled, this, &OBSBasicControls::EnableBroadcastFlow);
 	connect(main, &OBSBasic::ReplayBufEnabled, this, &OBSBasicControls::EnableReplayBufferButtons);
 	connect(main, &OBSBasic::VirtualCamEnabled, this, &OBSBasicControls::EnableVirtualCamButtons);
+	connect(main, &OBSBasic::StreamDestinationsStatusChanged, this,
+		&OBSBasicControls::UpdateStreamDestinationsStatus);
+
+	streamDestinationsStatus = new QLabel(this);
+	streamDestinationsStatus->setWordWrap(true);
+	streamDestinationsStatus->setAlignment(Qt::AlignCenter);
+	streamDestinationsStatus->hide();
+	ui->buttonsVLayout->insertWidget(1, streamDestinationsStatus);
+
+	main->UpdateStreamDestinationsStatus();
 }
 
 void OBSBasicControls::StreamingPreparing()
@@ -282,4 +297,20 @@ void OBSBasicControls::EnableVirtualCamButtons()
 {
 	ui->virtualCamButton->setVisible(true);
 	ui->virtualCamConfigButton->setVisible(true);
+}
+
+void OBSBasicControls::UpdateStreamDestinationsStatus(const QString &summary)
+{
+	if (!streamDestinationsStatus) {
+		return;
+	}
+
+	if (summary.isEmpty()) {
+		streamDestinationsStatus->hide();
+		return;
+	}
+
+	streamDestinationsStatus->setText(summary);
+	streamDestinationsStatus->setToolTip(summary);
+	streamDestinationsStatus->show();
 }

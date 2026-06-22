@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility/ExtraStreamOutputs.hpp>
 #include <utility/MultitrackVideoOutput.hpp>
 #include <utility/WHIPSimulcastEncoders.hpp>
 
@@ -45,6 +46,8 @@ struct BasicOutputHandler {
 
 	std::unique_ptr<WHIPSimulcastEncoders> whipSimulcastEncoders;
 
+	ExtraStreamOutputs extraStreamOutputs;
+
 	std::string outputType;
 	std::string lastError;
 
@@ -87,6 +90,15 @@ struct BasicOutputHandler {
 
 	virtual void Update() = 0;
 	virtual void SetupOutputs() = 0;
+
+	virtual obs_encoder_t *GetStreamVideoEncoder() const = 0;
+	virtual obs_encoder_t *GetStreamAudioEncoder() const = 0;
+
+	bool SetupExtraStreamOutputs();
+	bool StartExtraStreamOutputs(obs_data_t *outputSettings, int delaySec, bool preserveDelay, int maxRetries,
+				     int retryDelay);
+	void StopExtraStreamOutputs(bool force = false);
+	bool AnyExtraStreamActive() const;
 
 	virtual void UpdateVirtualCamOutputSource();
 	virtual void DestroyVirtualCamView();

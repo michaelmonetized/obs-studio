@@ -1347,14 +1347,42 @@ private slots:
 private:
 	OBSService service;
 
+	struct ExtraStreamDestinationData {
+		std::string displayName;
+		std::string type;
+		OBSData settings;
+	};
+
+	std::vector<ExtraStreamDestinationData> extraStreamDestinations;
+	std::vector<OBSService> extraStreamServices;
+
 	bool InitService();
+	void RebuildExtraStreamServices();
 
 public:
 	obs_service_t *GetService();
+	obs_service_t *GetService() const;
 	void SetService(obs_service_t *service);
 
 	void SaveService();
 	bool LoadService();
+
+	bool LoadExtraStreamDestinations();
+	void SaveExtraStreamDestinations();
+	std::vector<std::pair<OBSService, std::string>> GetExtraStreamDestinations() const;
+	bool AddExtraStreamDestination(const char *type, obs_data_t *settings, const std::string &displayName);
+	void RemoveExtraStreamDestination(size_t index);
+	void ShowAddStreamDestinationDialog(QWidget *parent = nullptr);
+
+	QString GetStreamDestinationLabel(obs_service_t *service) const;
+	QString GetStreamDestinationDisplayName() const;
+	QString BuildStreamDestinationsStatusText() const;
+	bool StreamDestinationsRequireOpus() const;
+	bool ValidateStreamDestinationEncoders(QString &error) const;
+	const std::vector<ExtraStreamOutput> &GetExtraStreamOutputEntries() const;
+
+public slots:
+	void UpdateStreamDestinationsStatus();
 
 	/* -------------------------------------
 	 * MARK: - OBSBasic_StatusBar
@@ -1390,7 +1418,7 @@ public slots:
 	void StreamStopping();
 	void StreamingStop(int errorcode, QString last_error);
 
-	bool StreamingActive();
+	bool StreamingActive() const;
 
 private slots:
 	/* Stream action (start/stop) slot */
@@ -1403,6 +1431,7 @@ signals:
 	void StreamingStarted(bool withDelay = false);
 	void StreamingStopping();
 	void StreamingStopped(bool withDelay = false);
+	void StreamDestinationsStatusChanged(const QString &summary);
 
 	/* -------------------------------------
 	 * MARK: - OBSBasic_StudioMode

@@ -603,6 +603,47 @@ OBSDataAutoRelease BasicOutputHandler::GenerateMultitrackVideoStreamDumpConfig()
 	return settings;
 }
 
+bool BasicOutputHandler::SetupExtraStreamOutputs()
+{
+	auto destinations = main->GetExtraStreamDestinations();
+	if (destinations.empty()) {
+		extraStreamOutputs.Clear();
+		return true;
+	}
+
+	return extraStreamOutputs.Setup(main, destinations, GetStreamVideoEncoder(), GetStreamAudioEncoder());
+}
+
+bool BasicOutputHandler::StartExtraStreamOutputs(obs_data_t *outputSettings, int delaySec, bool preserveDelay,
+						 int maxRetries, int retryDelay)
+{
+	if (main->GetExtraStreamDestinations().empty()) {
+		return true;
+	}
+
+	if (!SetupExtraStreamOutputs()) {
+		lastError = "Failed to setup extra stream destinations";
+		return false;
+	}
+
+	if (!extraStreamOutputs.Start(outputSettings, delaySec, preserveDelay, maxRetries, retryDelay)) {
+		lastError = "Failed to start one or more extra stream destinations";
+		return false;
+	}
+
+	return true;
+}
+
+void BasicOutputHandler::StopExtraStreamOutputs(bool force)
+{
+	extraStreamOutputs.Stop(force);
+}
+
+bool BasicOutputHandler::AnyExtraStreamActive() const
+{
+	return extraStreamOutputs.AnyActive();
+}
+
 BasicOutputHandler *CreateSimpleOutputHandler(OBSBasic *main)
 {
 	return new SimpleOutput(main);

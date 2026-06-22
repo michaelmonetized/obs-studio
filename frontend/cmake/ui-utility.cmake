@@ -1,6 +1,8 @@
 target_sources(
   obs-studio
   PRIVATE
+    utility/ExtraStreamOutputs.cpp
+    utility/ExtraStreamOutputs.hpp
     utility/AdvancedOutput.cpp
     utility/AdvancedOutput.hpp
     utility/BaseLexer.hpp
